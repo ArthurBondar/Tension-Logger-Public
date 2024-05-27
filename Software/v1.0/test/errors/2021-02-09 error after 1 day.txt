@@ -1,0 +1,39 @@
+abort() was called at PC 0x4008293e on core 0
+0x4008293e: lock_acquire_generic at S:/Projects/ESP-IDF/esp-idf/components/newlib/locks.c:143
+
+
+ELF file SHA256: 4af73f10b77cba67
+
+Backtrace: 0x4008737d:0x3ffc1ae0 0x40087719:0x3ffc1b00 0x4008293e:0x3ffc1b20 0x40082a61:0x3ffc1b50 0x4015e9b5:0x3ffc1b70 0x40156289:0x3ffc1e30 0x401561fd:0x3ffc1e80 0x40089b7d:0x3ffc1eb0 0x4008b814:0x3ffc1ed0 0x400d855a:0x3ffc1ef0 0x4016e9b2:0x3ffc1f30 0x4016e58f:0x3ffc1f60 0x4016e649:0x3ffc1fa0 0x400889b1:0x3ffc1fc0
+0x4008737d: invoke_abort at S:/Projects/ESP-IDF/esp-idf/components/esp32/panic.c:157
+
+0x40087719: abort at S:/Projects/ESP-IDF/esp-idf/components/esp32/panic.c:174
+
+0x4008293e: lock_acquire_generic at S:/Projects/ESP-IDF/esp-idf/components/newlib/locks.c:143
+
+0x40082a61: _lock_acquire_recursive at S:/Projects/ESP-IDF/esp-idf/components/newlib/locks.c:171
+
+0x4015e9b5: _vfiprintf_r at /builds/idf/crosstool-NG/.build/HOST-x86_64-w64-mingw32/xtensa-esp32-elf/src/newlib/newlib/libc/stdio/vfprintf.c:853 (discriminator 2)
+
+0x40156289: fiprintf at /builds/idf/crosstool-NG/.build/HOST-x86_64-w64-mingw32/xtensa-esp32-elf/src/newlib/newlib/libc/stdio/fiprintf.c:48
+
+0x401561fd: __assert_func at /builds/idf/crosstool-NG/.build/HOST-x86_64-w64-mingw32/xtensa-esp32-elf/src/newlib/newlib/libc/stdlib/assert.c:58 (discriminator 8)
+
+0x40089b7d: vPortCPUAcquireMutexIntsDisabledInternal at S:/Projects/ESP-IDF/esp-idf/components/freertos/portmux_impl.inc.h:105
+ (inlined by) vPortCPUAcquireMutexIntsDisabled at S:/Projects/ESP-IDF/esp-idf/components/freertos/portmux_impl.h:100
+ (inlined by) vTaskEnterCritical at S:/Projects/ESP-IDF/esp-idf/components/freertos/tasks.c:4201
+
+0x4008b814: xEventGroupSetBits at S:/Projects/ESP-IDF/esp-idf/components/freertos/event_groups.c:567 (discriminator 2)
+
+0x400d855a: event_handler(void*, char const*, int, void*) at s:\projects\tension-logger\software\v1.0\build/../components/Wifi/Wifi.cpp:59
+
+0x4016e9b2: handler_execute at S:/Projects/ESP-IDF/esp-idf/components/esp_event/esp_event.c:145
+
+0x4016e58f: esp_event_loop_run at S:/Projects/ESP-IDF/esp-idf/components/esp_event/esp_event.c:553 (discriminator 3)
+
+0x4016e649: esp_event_loop_run_task at S:/Projects/ESP-IDF/esp-idf/components/esp_event/esp_event.c:115
+
+0x400889b1: vPortTaskWrapper at S:/Projects/ESP-IDF/esp-idf/components/freertos/port.c:143
+
+
+CPU halted.

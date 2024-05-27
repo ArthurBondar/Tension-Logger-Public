@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Tension Logger | Storage</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand">
+    <a class="navbar-brand d-none d-sm-block" href="/index.html">
+      <h3 class="align-middle h3">Tension Logger</h3>
+    </a>
+    <ul class="navbar-nav nav nav-pills col">
+      <li class="nav-item text-center">
+        <a class="nav-link" href="/index.html">
+          <i class="align-middle" data-feather="bar-chart-2"></i>
+          <span class="align-middle d-none d-md-inline">Data</span></a>
+      </li>
+      <li class="nav-item text-center">
+        <a class="nav-link active" href="#">
+          <i class="align-middle" data-feather="save"></i>
+          <span class="align-middle d-none d-md-inline">Storage</span></a>
+      </li>
+      <li class="nav-item text-center">
+        <a class="nav-link" href="/settings.html">
+          <i class="align-middle d-inline" data-feather="settings"></i>
+          <span class="align-middle d-none d-md-inline">Settings</span></a>
+      </li>
+      <li class="nav-item text-center">
+        <a class="nav-link" href="/info.html">
+          <i class="align-middle" data-feather="info"></i>
+          <span class="align-middle d-none d-md-inline">Info</span></a>
+      </li>
+    </ul>
+    <span class="navbar-text align-middle text-nowrap d-none d-sm-inline" id="toolbar-version">Version 1.0 © 2020</span>
+  </nav>
+
+
+  <div class="container-fluid">
+
+    <div class="row mt-2 align-items-center">
+      <div class="col-12 col-sm-6 col-lg-4">
+        <canvas class="my-4" id="memoryChart" width="40">
+          Your browser does not support the canvas element.
+        </canvas>
+      </div>
+      <table class="table table-sm col-12 col-sm-4 col-lg-3 ml-4">
+        <tr class=table>
+          <th>Disk Type:</th>
+          <td id="diskType">loading..</td>
+        </tr>
+        <tr>
+          <th>Disk Space:</th>
+          <td id="diskSpace"></td>
+        </tr>
+        <tr>
+          <th>Used:</th>
+          <td id="diskUsed"></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="row col-lg-8 col-12 align-items-center">
+      <button type="button" class="btn btn-md btn-primary float-left mt-2 mb-2" onclick="listDir()">List Files</button>
+      <table class="table table-striped table-sm" id="directoryTable">
+        <thead>
+          <tr class="text-center">
+            <th style="width: 5%">#</th>
+            <th style="width: 25%">Name</th>
+            <th style="width: 25%">Date</th>
+            <th style="width: 10%">Size</th>
+            <th style="width: 30%"></th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      </main>
+    </div>
+  </div>
+
+
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="/js/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+  <script>window.jQuery || document.write('<script src="/js/jquery-3.2.1.min.js"><\/script>')</script>
+  <script src="/js/popper.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/feather.min.js"></script> <!-- Icons -->
+  <script src="/js/chart.min.js"></script> <!-- Graphs -->
+  <script src="/js/utils.js"></script> <!-- My script 1 -->
+  <script src="/js/storage.js"></script> <!-- My script -->
+
+
+</body>
+
+</html>

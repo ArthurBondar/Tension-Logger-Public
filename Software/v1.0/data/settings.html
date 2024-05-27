@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Tension Logger | Settings</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand">
+    <a class="navbar-brand d-none d-sm-block" href="/index.html">
+      <h3 class="align-middle h3">Tension Logger</h3>
+    </a>
+    <ul class="navbar-nav nav nav-pills col">
+      <li class="nav-item text-center">
+        <a class="nav-link" href="/index.html">
+          <i class="align-middle" data-feather="bar-chart-2"></i>
+          <span class="align-middle d-none d-md-inline">Data</span></a>
+      </li>
+      <li class="nav-item text-center">
+        <a class="nav-link" href="/storage.html">
+          <i class="align-middle" data-feather="save"></i>
+          <span class="align-middle d-none d-md-inline">Storage</span></a>
+      </li>
+      <li class="nav-item text-center">
+        <a class="nav-link active" href="#">
+          <i class="align-middle d-inline" data-feather="settings"></i>
+          <span class="align-middle d-none d-md-inline">Settings</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/info.html">
+          <i class="align-middle" data-feather="info"></i>
+          <span class="align-middle d-none d-md-inline">Info</span></a>
+      </li>
+    </ul>
+    <span class="navbar-text align-middle text-nowrap d-none d-sm-inline" id="toolbar-version">© 2020</span>
+  </nav>
+
+  <div class="container-fluid">
+    <main role="main" class="col-12 col-lg-8 pt-3 align-items-center">
+
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap">
+        <h3 class="h3 align-middle"><strong>Settings</strong></h3>
+        <div class="mb-1">
+          <button id="datetime_button" class="btn btn-md btn-info">Update Time</button>
+          <button id="settings_button" class="btn btn-md btn-success">Update Settings</button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <tr>
+            <td class="align-middle" style="width: 20%">Date and Time</td>
+            <td class="align-middle" style="width: 20%" id="settings-datetime"></td>
+            <td>
+              <input class="form-control" type="datetime-local" id="settings-datetime-input">
+            </td>
+          </tr>
+          <tr>
+            <td class="align-middle">Graph points</td>
+            <td class="align-middle" id="settings-points"></td>
+            <td>
+              <input type="text" class="form-control" placeholder="enter number of points"
+                aria-label="enter number of points" aria-describedby="basic-addon2" id="settings-points-input">
+            </td>
+          </tr>
+          <tr>
+            <td class="align-middle">Refresh rate</td>
+            <td class="align-middle" id="settings-refresh"></td>
+            <td class="align-middle">
+              <div class="input-group align-middle">
+                <input type="text" class="form-control" placeholder="enter refresh rate" aria-label="enter refresh rate"
+                  aria-describedby="basic-addon2" id="settings-refresh-input">
+                <div class="input-group-append">
+                  <span class="input-group-text" id="basic-addon2">sec</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-middle">Setpoint</td>
+            <td class="align-middle" id="settings-setpoint"></td>
+            <td>
+              <div class="input-group align-middle">
+                <input type="text" class="form-control" placeholder="enter new setpoint" aria-label="enter new setpoint"
+                  aria-describedby="basic-addon2" id="settings-setpoint-input">
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-middle">Storage interval</td>
+            <td class="align-middle" id="settings-logging"></td>
+            <td>
+              <div class="input-group align-middle">
+                <input type="text" class="form-control" placeholder="enter logging rate" aria-label="enter logging rate"
+                  aria-describedby="basic-addon2" id="settings-logging-input">
+                <div class="input-group-append">
+                  <span class="input-group-text" id="basic-addon2">sec</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="align-middle">Version</td>
+            <td class="align-middle"id="settings-version"></td>
+            <td class="align-middle"></td>
+          </tr>
+          <tr>
+            <td class="align-middle">Coin Cell</td>
+            <td class="align-middle" id="settings-coincell"></td>
+            <td class="align-middle"></td>
+          </tr>
+          <tr>
+            <td class="align-middle">Temperature</td>
+            <td class="align-middle" id="settings-temperature"></td>
+            <td class="align-middle"></td>
+          </tr>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="/js/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+  <script>window.jQuery || document.write('<script src="/js/jquery-3.2.1.min.js"><\/script>')</script>
+  <script src="/js/popper.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/feather.min.js"></script> <!-- Icons -->
+  <script src="/js/chart.min.js"></script> <!-- Graphs -->
+  <script src="/js/utils.js"></script> <!-- My script 1 -->
+  <script src="/js/settings.js"></script> <!-- My script -->
+
+  <style>
+    tr {
+      line-height: 30px;
+      min-height: 30px;
+      height: 30px;
+    }
+  </style>
+
+</body>
+
+</html>

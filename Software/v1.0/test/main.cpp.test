@@ -1,0 +1,388 @@
+/* Simple HTTP Server Example
+   This example code is in the Public Domain (or CC0 licensed, at your option.)
+   Unless required by applicable law or agreed to in writing, this
+   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+   CONDITIONS OF ANY KIND, either express or implied.
+*/
+
+#include "Wifi.h"
+#include "Server.h"
+#include "System.h"
+#include "Sensor.h"
+#include "SDCard.h"
+#include "Settings.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+
+#include <sys/time.h>
+#include <stdio.h>
+
+#define MAIN_TASK_LOOP 1000
+#define SENSOR_TASK_LOOP 500
+#define SENSOR_TASK_SER_TIMEOUT 500
+#define STORAGE_TASK_LOOP 1000
+#define DEBUG_TASK_LOOP 30000
+
+#define DATA_POINTS 30
+#define SENSOR_TIMEOUT_S 5
+
+#define FILE_HEADER "datetime, tension, units, peak, units\r\n"
+
+#define MOUNT_POINT "/spiffs/sdcard"
+
+extern "C"
+{
+    void app_main();
+}
+void sensor_task(void *pvParameters);
+void storage_task(void *pvParameters);
+void debug_task(void *pvParameters);
+
+static const char *TAG = "main";
+
+//QueueHandle_t xQueue;
+
+void app_main(void)
+{
+    ESP_LOGI(TAG, "app_main(): started");
+    esp_err_t ret;
+    // Options for mounting the filesystem.
+    // If format_if_mount_failed is set to true, SD card will be partitioned and
+    // formatted in case when mounting fails.
+    esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+#ifdef CONFIG_EXAMPLE_FORMAT_IF_MOUNT_FAILED
+        .format_if_mount_failed = true,
+#else
+        .format_if_mount_failed = false,
+#endif // EXAMPLE_FORMAT_IF_MOUNT_FAILED
+        .max_files = 5,
+        .allocation_unit_size = 16 * 1024};
+    sdmmc_card_t *card;
+    const char mount_point[] = MOUNT_POINT;
+    ESP_LOGI(TAG, "Initializing SD card");
+
+    // Use settings defined above to initialize SD card and mount FAT filesystem.
+    // Note: esp_vfs_fat_sdmmc/sdspi_mount is all-in-one convenience functions.
+    // Please check its source code and implement error recovery when developing
+    // production applications.
+
+    ESP_LOGI(TAG, "Using SDMMC peripheral");
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    host.flags = SDMMC_HOST_FLAG_4BIT;
+    host.max_freq_khz = SDMMC_FREQ_HIGHSPEED;
+
+    // This initializes the slot without card detect (CD) and write protect (WP) signals.
+    // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
+    sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+    slot_config.width = 4;
+
+    ret = esp_vfs_fat_sdmmc_mount(mount_point, &host, &slot_config, &mount_config, &card);
+
+    if (ret != ESP_OK)
+    {
+        if (ret == ESP_FAIL)
+        {
+            ESP_LOGE(TAG, "Failed to mount filesystem. "
+                          "If you want the card to be formatted, set the EXAMPLE_FORMAT_IF_MOUNT_FAILED menuconfig option.");
+        }
+        else
+        {
+            ESP_LOGE(TAG, "Failed to initialize the card (%s). "
+                          "Make sure SD card lines have pull-up resistors in place.",
+                     esp_err_to_name(ret));
+        }
+        return;
+    }
+
+    // Card has been initialized, print its properties
+    sdmmc_card_print_info(stdout, card);
+
+    // Use POSIX and C standard library functions to work with files.
+    // First create a file.
+    ESP_LOGI(TAG, "Opening file");
+    FILE *f = fopen(MOUNT_POINT "/hello.txt", "w");
+    if (f == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to open file for writing");
+        return;
+    }
+    fprintf(f, "Hello %s!\n", card->cid.name);
+    fclose(f);
+    ESP_LOGI(TAG, "File written");
+
+    // Check if destination file exists before renaming
+    struct stat st;
+    if (stat(MOUNT_POINT "/foo.txt", &st) == 0)
+    {
+        // Delete it if it exists
+        unlink(MOUNT_POINT "/foo.txt");
+    }
+
+    // Rename original file
+    ESP_LOGI(TAG, "Renaming file");
+    if (rename(MOUNT_POINT "/hello.txt", MOUNT_POINT "/foo.txt") != 0)
+    {
+        ESP_LOGE(TAG, "Rename failed");
+        return;
+    }
+
+    // Open renamed file for reading
+    ESP_LOGI(TAG, "Reading file");
+    f = fopen(MOUNT_POINT "/foo.txt", "r");
+    if (f == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to open file for reading");
+        return;
+    }
+    char line[64];
+    fgets(line, sizeof(line), f);
+    fclose(f);
+    // strip newline
+    char *pos = strchr(line, '\n');
+    if (pos)
+    {
+        *pos = '\0';
+    }
+    ESP_LOGI(TAG, "Read from file: '%s'", line);
+
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    // All done, unmount partition and disable SDMMC or SPI peripheral
+    ret = esp_vfs_fat_sdcard_unmount(mount_point, card);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "umount(): VFS-FAT-SDMMC unmount failed (%s)", esp_err_to_name(ret));
+    }
+
+    ESP_LOGI(TAG, "Card unmounted");
+#ifdef USE_SPI_MODE
+    //deinitialize the bus after all devices are removed
+    spi_bus_free(host.slot);
+#endif
+    vTaskDelete(NULL);
+}
+
+//
+void sensor_task(void *pvParameters)
+{
+    ESP_LOGI(TAG, "sensor_task(): started");
+
+    Sensor *sensor = Sensor::instance();
+    System *system = System::instance();
+    SensorData data_point = SENSOR_DEFAULTS();
+    tm _time = TIME_DEFAULTS();
+    double sec = 0;
+
+    //sensor->resetLine();
+    while (1)
+    {
+        // sensor->readSerial(SENSOR_TASK_SER_TIMEOUT);
+        // data_point = sensor->getData();
+        // system->getTime(&_time);
+        // // time_t time1 = mktime(&_time);
+        // // time_t time2 = mktime(&data_point.timestamp);
+        // sec = difftime(mktime(&_time), mktime(&data_point.timestamp));
+        // //ESP_LOGI(TAG, "sensor_task(): time1: %jd time2 %jd diff:%.0f", (intmax_t)time1, (intmax_t)time2, sec);
+        // if (sec > SENSOR_TIMEOUT_S || sec < 0)
+        //     system->setErrorFlag(sensor_not_found);
+        // else
+        //     system->clearErrorFlag(sensor_not_found);
+        // //sensor->dumpData(&data_point, 1);
+        vTaskDelay(pdMS_TO_TICKS(SENSOR_TASK_LOOP));
+    }
+
+    vTaskDelete(NULL);
+}
+
+//
+void storage_task(void *pvParameters)
+{
+    ESP_LOGI(TAG, "storage_task(): started");
+
+    Sensor *sensor = Sensor::instance();
+    //Settings *_settings = Settings::instance();
+    System *system = System::instance();
+    //SDCard *card = SDCard::instance();
+    SensorData data_points[DATA_POINTS] = {SENSOR_DEFAULTS()};
+    int sec_count = 0, buff_count = 0, index = 0, interval_s = 1;
+    double f_interval = 1;
+    char file_name[MAX_FILE_NAME], line_buff[LINE_BUFFER], time_buff[TIME_LEN];
+    tm _time = TIME_DEFAULTS();
+    esp_err_t rc;
+
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    if (system->checkError() != ESP_OK)
+        vTaskDelete(NULL);
+
+    // if (card->mount() != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "storage_task(): mount failed");
+    //     vTaskDelete(NULL);
+    // }
+
+    // sdmmc_card_t *_card;
+
+    // // configure slot
+    // sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+    // //slot_config.gpio_cd = (gpio_num_t) 27;
+    // slot_config.gpio_cd = SDMMC_SLOT_NO_CD;
+    // slot_config.gpio_wp = SDMMC_SLOT_NO_WP;
+    // slot_config.width = 4;
+
+    // // configure host
+    // sdmmc_host_t host = {
+    //     .flags = SDMMC_HOST_FLAG_4BIT,
+    //     .slot = SDMMC_HOST_SLOT_1,
+    //     .max_freq_khz = SDMMC_FREQ_HIGHSPEED,
+    //     .io_voltage = 3.3f,
+    //     .init = &sdmmc_host_init,
+    //     .set_bus_width = &sdmmc_host_set_bus_width,
+    //     .get_bus_width = &sdmmc_host_get_slot_width,
+    //     .set_bus_ddr_mode = &sdmmc_host_set_bus_ddr_mode,
+    //     .set_card_clk = &sdmmc_host_set_card_clk,
+    //     .do_transaction = &sdmmc_host_do_transaction,
+    //     .deinit = &sdmmc_host_deinit,
+    //     .io_int_enable = &sdmmc_host_io_int_enable,
+    //     .io_int_wait = &sdmmc_host_io_int_wait,
+    //     .command_timeout_ms = 0};
+
+    // esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+    //     .format_if_mount_failed = false,
+    //     .max_files = 2,
+    //     .allocation_unit_size = 0};
+
+    // // mount
+    // rc = esp_vfs_fat_sdmmc_mount(SD_CARD_MOUNT_POINT, &host, &slot_config, &mount_config, &_card);
+    // if (rc != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "init(): Failed to initialize the card (%s)", esp_err_to_name(rc));
+    // }
+    // // DEBUG
+    // //sdmmc_card_print_info(stdout, this->_card);
+    // ESP_LOGI(TAG, "init(): Card mounted successfully");
+    // vTaskDelay(pdMS_TO_TICKS(5000));
+
+    // rc = esp_vfs_fat_sdcard_unmount(SD_CARD_MOUNT_POINT, _card);
+    // if (rc != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "umount(): VFS-FAT-SDMMC unmount failed (%s)", esp_err_to_name(rc));
+    // }
+
+    // esp_err_t ret;
+    // // Options for mounting the filesystem.
+    // // If format_if_mount_failed is set to true, SD card will be partitioned and
+    // // formatted in case when mounting fails.
+    // esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+
+    //     .max_files = 5,
+    //     .allocation_unit_size = 16 * 1024};
+    // sdmmc_card_t *card;
+    // const char mount_point[] = SD_CARD_MOUNT_POINT;
+    // ESP_LOGI(TAG, "Initializing SD card");
+    // sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    // host.flags = SDMMC_HOST_FLAG_4BIT;
+    // host.max_freq_khz = SDMMC_FREQ_HIGHSPEED;
+
+    // // This initializes the slot without card detect (CD) and write protect (WP) signals.
+    // // Modify slot_config.gpio_cd and slot_config.gpio_wp if your board has these signals.
+    // sdmmc_slot_config_t slot_config = SDMMC_SLOT_CONFIG_DEFAULT();
+    // slot_config.width = 4;
+
+    // ret = esp_vfs_fat_sdmmc_mount(mount_point, &host, &slot_config, &mount_config, &card);
+    // if (ret != ESP_OK)
+    // {
+    //     if (ret == ESP_FAIL)
+    //     {
+    //         ESP_LOGE(TAG, "Failed to mount filesystem. "
+    //                       "If you want the card to be formatted, set the EXAMPLE_FORMAT_IF_MOUNT_FAILED menuconfig option.");
+    //     }
+    //     else
+    //     {
+    //         ESP_LOGE(TAG, "Failed to initialize the card (%s). "
+    //                       "Make sure SD card lines have pull-up resistors in place.",
+    //                  esp_err_to_name(ret));
+    //     }
+    //     return;
+    // }
+
+    // // Card has been initialized, print its properties
+    // sdmmc_card_print_info(stdout, card);
+
+    // // Use POSIX and C standard library functions to work with files.
+    // // First create a file.
+    // // ESP_LOGI(TAG, "Opening file");
+    // // FILE *f = fopen(MOUNT_POINT "/hello.txt", "w");
+    // // if (f == NULL)
+    // // {
+    // //     ESP_LOGE(TAG, "Failed to open file for writing");
+    // //     return;
+    // // }
+    // // fprintf(f, "Hello %s!\n", card->cid.name);
+    // // fclose(f);
+    // // ESP_LOGI(TAG, "File written");
+
+    // vTaskDelay(pdMS_TO_TICKS(5000));
+
+    // // All done, unmount partition and disable SDMMC or SPI peripheral
+    // ret = esp_vfs_fat_sdcard_unmount(mount_point, card);
+    // if (ret != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "umount(): VFS-FAT-SDMMC unmount failed (%s)", esp_err_to_name(ret));
+    //}
+
+    // if (card->openFile("test_file.txt", "w") != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "storage_task(): openFile failed");
+    //     vTaskDelete(NULL);
+    // }
+
+    // if (card->writeFile("this is a test\r\nHello Test!") != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "storage_task(): writeFile failed");
+    //     vTaskDelete(NULL);
+    // }
+
+    // if (card->closeFile() != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "storage_task(): closeFile failed");
+    //     vTaskDelete(NULL);
+    // }
+
+    // if (card->unmount() != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "storage_task(): unmount failed");
+    //     //vTaskDelete(NULL);
+    // }
+
+    while (1)
+    {
+
+        vTaskDelay(pdMS_TO_TICKS(STORAGE_TASK_LOOP));
+    }
+
+    vTaskDelete(NULL);
+}
+
+//
+void debug_task(void *pvParameters)
+{
+    ESP_LOGI(TAG, "debug_task(): started");
+    size_t free = 0, total = 0, used = 0;
+    tm now;
+    char time_str[TIME_LEN];
+    //float fused = 0, ftotal = 0;
+    while (1)
+    {
+        //heap_caps_print_heap_info(MALLOC_CAP_8BIT); // MALLOC_CAP_8BIT
+        free = heap_caps_get_free_size(MALLOC_CAP_8BIT);
+        total = heap_caps_get_total_size(MALLOC_CAP_8BIT);
+        used = total - free;
+        System::instance()->getTime(&now);
+        memset(time_str, 0, TIME_LEN);
+        System::instance()->getTimeString(time_str, TIME_LEN, TIME_FORMAT_SEC, now);
+        ESP_LOGI(TAG, "debug_task(): %s %.2fKB / %.2fKB (%.2f%%)", time_str, (float)used / 1024.0, (float)total / 1024, (float)used * 100 / total);
+        vTaskDelay(pdMS_TO_TICKS(DEBUG_TASK_LOOP));
+    }
+    vTaskDelete(NULL);
+}

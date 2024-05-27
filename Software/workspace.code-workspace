@@ -1,0 +1,52 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"terminal.integrated.shell.windows": "cmd.exe",
+		"terminal.integrated.shellArgs.windows": [
+			"/k",
+			"S:/Projects/ESP-IDF/esp-idf/export.bat"
+		],
+		"actionButtons": {
+			"defaultColor": "white",
+			"reloadButton": "Reload",
+			"commands": [
+				{
+					"cwd": "${workspaceFolder}/Software/v1.0/",
+					"name": "BUILD",
+					"color": "white",
+					"command": "idf.py build",
+				},
+				{
+					"cwd": "${workspaceFolder}/Software/v1.0/",
+					"name": "FLASH",
+					"color": "white",
+					"command": "idf.py flash -p COM7 -b 921600 monitor",
+				},
+				{
+					"cwd": "${workspaceFolder}/Software/v1.0/",
+					"name": "CLEAN",
+					"color": "white",
+					"command": "idf.py fullclean",
+				}
+			]
+		},
+		"editor.minimap.enabled": false,
+		"window.zoomLevel": 0,
+		"files.associations": {
+			"sstream": "cpp",
+			"*.inc": "cpp",
+			"array": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"*.tcc": "cpp",
+			"fstream": "cpp",
+			"*.ipp": "cpp",
+			"chrono": "cpp",
+			"algorithm": "cpp"
+		},
+	}
+}

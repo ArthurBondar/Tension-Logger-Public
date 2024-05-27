@@ -1,0 +1,16 @@
+S:\Projects\Tension-Logger\Software\v1.0>s:\projects\esp-idf\esp-tools\python_env\idf4.2_py3.8_env\lib\site-packages\esptool.py -p COM7 flash_id
+esptool.py v3.0
+Serial port COM7
+Connecting.....
+Detecting chip type... ESP32
+Chip is ESP32-D0WD (revision 1)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: f4:cf:a2:ba:d7:e4
+Uploading stub...
+Running stub...
+Stub running...
+Manufacturer: 20
+Device: 4018
+Detected flash size: 16MB
+Hard resetting via RTS pin...

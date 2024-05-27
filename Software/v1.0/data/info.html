@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>Tension Logger</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-dark bg-dark sticky-top navbar-expand">
+    <a class="navbar-brand d-none d-sm-block" href="/index.html">
+      <h3 class="align-middle h3">Tension Logger</h3>
+    </a>
+    <ul class="navbar-nav nav nav-pills col">
+      <li class="nav-item text-center">
+        <a class="nav-link" href="/index.html">
+          <i class="align-middle" data-feather="bar-chart-2"></i>
+          <span class="align-middle d-none d-md-inline">Data</span></a>
+      </li>
+      <li class="nav-item text-center">
+        <a class="nav-link" href="/storage.html">
+          <i class="align-middle" data-feather="save"></i>
+          <span class="align-middle d-none d-md-inline">Storage</span></a>
+      </li>
+      <li class="nav-item text-center">
+        <a class="nav-link" href="/settings.html">
+          <i class="align-middle d-inline" data-feather="settings"></i>
+          <span class="align-middle d-none d-md-inline">Settings</span></a>
+      </li>
+      <li class="nav-item text-center">
+        <a class="nav-link active" href="#">
+          <i class="align-middle" data-feather="info"></i>
+          <span class="align-middle d-none d-md-inline">Info</span></a>
+      </li>
+    </ul>
+    <span class="navbar-text align-middle text-nowrap d-none d-sm-inline" id="toolbar-version">Version 1.0 © 2020</span>
+  </nav>
+
+  <div class="container-fluid">
+    <main role="main" class="col-12 col-lg-11 pt-3 align-items-center">
+
+      <h4 class="h4 mb-3">Settings</h2>
+        <div class="table-responsive">
+          <table class="table">
+            <tr>
+              <td class="align-middle" style="width: 20%">Date and Time</td>
+              <td class="align-middle" style="width: 20%">[selection]</td>
+              <td class="align-middle">Date and time of the internal clock chip</td>
+            </tr>
+            <tr>
+              <td class="align-middle">Graph points</td>
+              <td class="align-middle">[0 to 100]</td>
+              <td class="align-middle">Number of datapoints plotted on the graph on the graph at once (0 = disable
+                graph)</td>
+            </tr>
+            <tr>
+              <td class="align-middle">Refresh rate</td>
+              <td class="align-middle">[1 to 1800]</td>
+              <td class="align-middle">Rate at which new datapoints are displayed on the graph</td>
+            </tr>
+            <tr>
+              <td class="align-middle">Setpoint</td>
+              <td class="align-middle">[any]</td>
+              <td class="align-middle">Maximum load indicator</td>
+            </tr>
+            <tr>
+              <td class="align-middle">Logging interval</td>
+              <td class="align-middle">[1 to 1800]</td>
+              <td class="align-middle">Rate at which the data is stored to the SD card in seconds</td>
+            </tr>
+            <tr>
+              <td class="align-middle">Coin Cell</td>
+              <td class="align-middle">[V]</td>
+              <td class="align-middle">Voltage of the coin cell battery</td>
+            </tr>
+            <tr>
+              <td class="align-middle">Temperature</td>
+              <td class="align-middle">[°C]</td>
+              <td class="align-middle">Temperature inside the enclosure</td>
+            </tr>
+          </table>
+        </div>
+
+        <h4 class="h4 mt-3">Status</h2>
+          <div class="table-responsive">
+            <table class="table">
+              <tr>
+                <td class="align-middle" style="width: 20%">normal operation</td>
+                <td class="align-middle">reading from sensor and writing to SD card</td>
+              </tr>
+              <tr>
+                <td class="align-middle">storage card not found</td>
+                <td class="align-middle">SD card not detected</td>
+              </tr>
+              <tr>
+                <td class="align-middle">sensor not connected</td>
+                <td class="align-middle">no incomming data from the tension sensor</td>
+              </tr>
+              <tr>
+                <td class="align-middle">coincell battery low</td>
+                <td class="align-middle">voltage on the coincell battery is below threshold</td>
+              </tr>
+              <tr>
+                <td class="align-middle">internal error</td>
+                <td class="align-middle">any internal system error</td>
+              </tr>
+              <tr>
+                <td class="align-middle">sensor parsing error</td>
+                <td class="align-middle">failed to parse data from the tension sensor</td>
+              </tr>
+              <tr>
+                <td class="align-middle">memory overflow</td>
+                <td class="align-middle">internal memory overflow in the unit - reboot required</td>
+              </tr>
+            </table>
+          </div>
+
+    </main>
+  </div>
+
+  <!-- Bootstrap core JavaScript
+    ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="/js/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+  <script>window.jQuery || document.write('<script src="/js/jquery-3.2.1.min.js"><\/script>')</script>
+  <script src="/js/popper.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/feather.min.js"></script> <!-- Icons -->
+  <script src="/js/chart.min.js"></script> <!-- Graphs -->
+  <script>
+    feather.replace();
+    (async () => {
+      let info = await getJSON(infoURL) || 0;
+      if (info != 0)
+        setValue("toolbar-version", "Version " + info.version + " © 2020");
+    })
+  </script>
+
+  <style>
+    tr {
+      line-height: 15px;
+      min-height: 15px;
+      height: 15px;
+    }
+  </style>
+
+</body>
+
+</html>

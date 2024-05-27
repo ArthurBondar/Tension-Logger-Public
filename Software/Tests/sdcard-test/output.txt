@@ -1,0 +1,44 @@
+SD Card Type: SDHC
+SD Card Size: 29988MB
+Listing directory: /
+ DIR : /System Volume Information
+ FILE: /test.txt SIZE: 1048576
+ FILE: /foo.txt SIZE: 13
+ FILE: /this_is_a_test.txt SIZE: 23
+ DIR : /testttt
+Creating Dir: /mydir
+Dir created
+Listing directory: /
+ DIR : /System Volume Information
+ FILE: /test.txt SIZE: 1048576
+ FILE: /foo.txt SIZE: 13
+ DIR : /mydir
+ FILE: /this_is_a_test.txt SIZE: 23
+ DIR : /testttt
+Removing Dir: /mydir
+Dir removed
+Listing directory: /
+ DIR : /System Volume Information
+Listing directory: /System Volume Information
+ FILE: /System Volume Information/WPSettings.dat SIZE: 12
+ FILE: /System Volume Information/IndexerVolumeGuid SIZE: 76
+ FILE: /test.txt SIZE: 1048576
+ FILE: /foo.txt SIZE: 13
+ FILE: /this_is_a_test.txt SIZE: 23
+ DIR : /testttt
+Listing directory: /testttt
+ FILE: /testttt/this_is_a_test.txt SIZE: 23
+Writing file: /hello.txt
+File written
+Appending to file: /hello.txt
+Message appended
+Reading file: /hello.txt
+Read from file: Hello World!
+Deleting file: /foo.txt
+File deleted
+Renaming file /hello.txt to /foo.txt
+File renamed
+Reading file: /foo.txt
+Read from file: Hello World!
+1048576 bytes read for 3381 ms
+1048576 bytes written for 5536 ms
